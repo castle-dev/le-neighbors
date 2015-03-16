@@ -1,0 +1,28 @@
+{
+  "name": "neighbors",
+  "version": "0.0.1",
+  "description": "Find the nearest neighbors of any address!",
+  "main": "test.js",
+  "dependencies": {
+    "get": "^1.4.0",
+    "q": "^1.2.0",
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/castleDevTeam/neighbors.git"
+  },
+  "keywords": [
+    "addresses",
+    "neighbors"
+  ],
+  "author": "Tim Dingman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/castleDevTeam/neighbors/issues"
+  },
+  "homepage": "https://github.com/castleDevTeam/neighbors"
+}
