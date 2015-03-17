@@ -32,6 +32,33 @@ var makeUri = function(data) {
   return uri;
 };
 
+var newAddressObject = function(original, newAddress) {
+  var newAddressObject = {
+    address: newAddress,
+    city: original.city,
+    state: original.state,
+    zip: original.zip
+  };
+
+  return newAddressObject;
+};
+
+var getNumber = function(address) {
+  var split = address.split(' ');
+  return split[0];
+};
+
+var replaceAddress = function(addressObject, increment) {
+  var address = addressObject.address;
+  var number = getNumber(address);
+  var street = address.slice(number.length);
+  
+  var nextNumber = parseInt(number) + increment;
+  var nextAddress = nextNumber + street;
+
+  return newAddressObject(addressObject, nextAddress);
+};
+
 var isValid = function(data) {
   var defer = q.defer();
   var uri = makeUri(data);
@@ -44,28 +71,4 @@ var isValid = function(data) {
   });
   return defer.promise;
 };
-
-var getNumber = function(address) {
-  var split = address.split(' ');
-  return split[0];
-};
-
-var getNextAddress = function(address, increment) {
-  var number = getNumber(address);
-  var street = address.slice(number.length);
-  
-  var nextNumber = parseInt(number) + increment;
-  nextAddress = nextNumber + street;
-
-  return nextAddress;
-};
-
-var getNeighbors = function(data) {
-  var sameUp = walk(data, 2, 1, 100);
-  var sameDown = walk(data, 2, -1, 100);
-  var acrossUp = walk(data, 1, 1, 100);
-  var acrossDown = walk(data, 1, -1, 100);
-  return [sameUp, sameDown, acrossUp, acrossDown];
-};
-
 
