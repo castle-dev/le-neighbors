@@ -1,8 +1,22 @@
 var get = require('get');
 var q = require('q');
 
-var data = {
+var us = {
   address: '760 Virginia Park Street',
+  city: 'Detroit',
+  state: 'MI',
+  zip: '48202'
+};
+
+var omarion = {
+  address: '759 Virginia Park Street',
+  city: 'Detroit',
+  state: 'MI',
+  zip: '48202'
+};
+
+var fake = {
+  address: '761 Virginia Park Street',
   city: 'Detroit',
   state: 'MI',
   zip: '48202'
@@ -13,7 +27,8 @@ var makeUri = function(data) {
             '&city=' + escape(data.city) +
             '&state=' + data.state + 
             '&zipcode=' + data.zip +
-            '&auth-id=c5fe82ac-e88c-41ed-bce7-968bf368ba4a&auth-token=4PKfgfUFyiMPtIc2v43i';
+            '&auth-id=c5fe82ac-e88c-41ed-bce7-968bf368ba4a' + 
+            '&auth-token=4PKfgfUFyiMPtIc2v43i';
   return uri;
 };
 
@@ -23,54 +38,26 @@ var isValid = function(data) {
   var dl = get(uri);
   dl.asString(function(err, ret) {
     if (err) defer.reject(err);
-    if (ret[0] === '[') defer.resolve(false);
+    // No results = no valid address
+    if (ret === '[]\n') defer.resolve(false);
     defer.resolve(true);
   });
   return defer.promise;
 };
-/*
-var a = isValid(data);
-a
-  .then(function(ret) {
-    console.log(ret);
-  })
-  .catch(function(err) {
-    console.log(err);
-  });
-*/
+
 var getNumber = function(address) {
   var split = address.split(' ');
   return split[0];
 };
 
-var walk = function(start, initial, posOrNeg, until) {
-  var defer = q.defer();
-  var startAddress = start.address;
-  var startNumber = getNumber(startAddress);
-  var startNumberLength = startNumber.length;
-
-  var next = start;
+var getNextAddress = function(address, increment) {
+  var number = getNumber(address);
+  var street = address.slice(number.length);
   
-  for (var i=initial; i<until; i += 2) {
-    var nextNumber = parseInt(startNumber) + i*posOrNeg;
-    var nextAddress = nextNumber + startAddress.slice(startNumberLength);
-    next.address = nextAddress;
-    var nextUri = makeUri(next);
-    var a = isValid(next);
-    a
-      .then(function(ret) {
-        if (ret) {
-          defer.resolve(nexAddress);
-        }
-        else {
-          defer.resolve(nextAddress + ' is invalid');
-        }
-      })
-      .catch(function(ret) {
-        defer.reject(ret);
-      });
-  }
-  return defer.promise;
+  var nextNumber = parseInt(number) + increment;
+  nextAddress = nextNumber + street;
+
+  return nextAddress;
 };
 
 var getNeighbors = function(data) {
@@ -80,7 +67,5 @@ var getNeighbors = function(data) {
   var acrossDown = walk(data, 1, -1, 100);
   return [sameUp, sameDown, acrossUp, acrossDown];
 };
-var a = walk(data, 1, -1, 4);
-a
-  .then(function(ret) { console.log(ret) })
-  .catch(function(err) { console.log(err) });
+
+
