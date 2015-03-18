@@ -66,9 +66,32 @@ var isValid = function(data) {
   dl.asString(function(err, ret) {
     if (err) defer.reject(err);
     // No results = no valid address
-    if (ret === '[]\n') defer.resolve(false);
-    defer.resolve(true);
+    if (ret === '[]\n') defer.reject();
+    defer.resolve();
   });
   return defer.promise;
 };
 
+var count = 0;
+findNearestNeighbor = function (addressObject, promise) {
+  count++;
+  console.log(count);
+  var nextAddress = replaceAddress(addressObject, -2);
+  isValid(nextAddress).then(function () {
+    // this is a neighbor
+    promise.resolve(nextAddress);
+  }, function () {
+    if (count < 7) {
+      findNearestNeighbor(nextAddress, promise);
+    }
+    else {
+      promise.reject(false);
+    }
+  });
+}
+
+var p = q.defer();
+findNearestNeighbor(us, p);
+p.promise
+  .then(function(ret) { console.log(ret); })
+  .catch(function(ret) { console.log(ret); });
