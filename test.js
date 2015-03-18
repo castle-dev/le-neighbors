@@ -1,6 +1,9 @@
 var get = require('get');
 var q = require('q');
 
+var MAX_STEPS = 100;
+var STEP_COUNT = 0;
+
 var us = {
   address: '760 Virginia Park Street',
   city: 'Detroit',
@@ -72,26 +75,60 @@ var isValid = function(data) {
   return defer.promise;
 };
 
-var count = 0;
-findNearestNeighbor = function (addressObject, promise) {
-  count++;
-  console.log(count);
-  var nextAddress = replaceAddress(addressObject, -2);
-  isValid(nextAddress).then(function () {
-    // this is a neighbor
-    promise.resolve(nextAddress);
-  }, function () {
-    if (count < 7) {
-      findNearestNeighbor(nextAddress, promise);
-    }
-    else {
-      promise.reject(false);
-    }
-  });
+var walk = function(defer, addressObject, initial, increment) {
+  STEP_COUNT++;
+  console.log(STEP_COUNT);
+  var nextAddress = replaceAddress(addressObject, increment);
+  isValid(nextAddress)
+    .then(
+      function () {
+        defer.resolve(nextAddress);
+      },
+      function () {
+        if (STEP_COUNT < MAX_STEPS) {
+          walk(defer, nextAddress, initial, increment);
+        }
+        else {
+          defer.reject();
+        }
+      }
+    );
 }
 
+var walkUp = function(addressObject) {
+  STEP_COUNT = 0;
+  var defer = q.defer();
+  walk(defer, addressObject, 0, 2);
+  defer.promise
+    .then(function(ret) {
+      return ret;
+    })
+    .catch(function(err) {
+      return err;
+    });
+};
+
+var walkDown = function(addressObject) {
+  STEP_COUNT = 0;
+  var defer = q.defer();
+  walk(defer, addressObject, 0, -2);
+  return defer.promise
+    .then(function(ret) {
+      console.log('about to return resolved');
+      return ret;
+    })
+    .catch(function(err) {
+      console.log('about to return err');
+      return err;
+    });
+};
+
+console.log(walkDown(us));
+
+/*
 var p = q.defer();
-findNearestNeighbor(us, p);
+walk(p, us, 0, -2);
 p.promise
   .then(function(ret) { console.log(ret); })
   .catch(function(ret) { console.log(ret); });
+  */
