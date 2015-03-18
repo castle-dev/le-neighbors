@@ -2,7 +2,9 @@ var get = require('get');
 var q = require('q');
 
 var MAX_STEPS = 100;
-var STEP_COUNT = 0;
+var STEPS_UP = 0;
+var STEPS_DOWN = 0;
+var STEPS_ACROSS = 0;
 
 var us = {
   address: '760 Virginia Park Street',
@@ -11,8 +13,8 @@ var us = {
   zip: '48202'
 };
 
-var omarion = {
-  address: '759 Virginia Park Street',
+var afc = {
+  address: '750 Virginia Park Street',
   city: 'Detroit',
   state: 'MI',
   zip: '48202'
@@ -76,8 +78,20 @@ var isValid = function(data) {
 };
 
 var walk = function(defer, addressObject, initial, increment) {
-  STEP_COUNT++;
-  console.log(STEP_COUNT);
+  if (Math.abs(initial) === 1) {
+    STEPS_ACROSS++;
+    var step_count = STEPS_ACROSS;
+  }
+  else if (increment > 0) {
+    STEPS_UP++;
+    var step_count = STEPS_UP;
+  }
+  else if (increment < 0) {
+    STEPS_DOWN++;
+    var step_count = STEPS_DOWN;
+  }
+  
+  console.log(increment + ' is increment. step count: ' + step_count);
   var nextAddress = replaceAddress(addressObject, increment);
   isValid(nextAddress)
     .then(
@@ -85,7 +99,7 @@ var walk = function(defer, addressObject, initial, increment) {
         defer.resolve(nextAddress);
       },
       function () {
-        if (STEP_COUNT < MAX_STEPS) {
+        if (step_count < MAX_STEPS) {
           walk(defer, nextAddress, initial, increment);
         }
         else {
@@ -95,40 +109,49 @@ var walk = function(defer, addressObject, initial, increment) {
     );
 }
 
+var walkDown = function(addressObject) {
+  STEPS_DOWN = 0;
+  var defer = q.defer();
+  walk(defer, addressObject, 0, -2);
+  defer.promise
+    .then(function(ret) {
+      defer.resolve(ret);
+    })
+    .catch(function(err) {
+      defer.reject(err);
+    });
+  return defer.promise;
+};
+
 var walkUp = function(addressObject) {
-  STEP_COUNT = 0;
+  STEPS_UP = 0;
   var defer = q.defer();
   walk(defer, addressObject, 0, 2);
   defer.promise
     .then(function(ret) {
-      return ret;
+      defer.resolve(ret);
     })
     .catch(function(err) {
-      return err;
+      defer.reject(err);
     });
+  return defer.promise;
 };
-
-var walkDown = function(addressObject) {
-  STEP_COUNT = 0;
-  var defer = q.defer();
-  walk(defer, addressObject, 0, -2);
-  return defer.promise
-    .then(function(ret) {
-      console.log('about to return resolved');
-      return ret;
-    })
-    .catch(function(err) {
-      console.log('about to return err');
-      return err;
-    });
-};
-
-console.log(walkDown(us));
 
 /*
-var p = q.defer();
-walk(p, us, 0, -2);
-p.promise
+walkDown(us)
   .then(function(ret) { console.log(ret); })
-  .catch(function(ret) { console.log(ret); });
+  .catch(function(err) { console.log(err); });
+
+walkUp(us)
+  .then(function(ret) { console.log(ret); })
+  .catch(function(err) { console.log(err); });
   */
+
+q.all([
+    walkDown(afc),
+    walkUp(afc)
+    ])
+  .spread(function(down, up) {
+    console.log('down neighbor is ' + down.address);
+    console.log('up neighbor is ' + up.address);
+  });
