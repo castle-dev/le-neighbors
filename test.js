@@ -6,6 +6,9 @@ var STEPS_UP = 0;
 var STEPS_DOWN = 0;
 var STEPS_ACROSS = 0;
 
+var AUTH_ID = 'c5fe82ac-e88c-41ed-bce7-968bf368ba4a';
+var AUTH_TOKEN = '4PKfgfUFyiMPtIc2v43i';
+
 var us = {
   address: '760 Virginia Park Street',
   city: 'Detroit',
@@ -32,8 +35,8 @@ var makeUri = function(data) {
             '&city=' + escape(data.city) +
             '&state=' + data.state + 
             '&zipcode=' + data.zip +
-            '&auth-id=c5fe82ac-e88c-41ed-bce7-968bf368ba4a' + 
-            '&auth-token=4PKfgfUFyiMPtIc2v43i';
+            '&auth-id=' + AUTH_ID +
+            '&auth-token=' + AUTH_TOKEN;
   return uri;
 };
 
@@ -136,11 +139,36 @@ var walkUp = function(addressObject) {
   return defer.promise;
 };
 
-q.all([
-    walkDown(afc),
-    walkUp(afc)
+// This method is totally untested!
+var walkAcross = function(addressObject) {
+  STEPS_ACROSS = 0;
+  var defer1 = q.defer();
+  walk(defer1, addressObject, -1, -2);
+  defer1.promise
+    .then(function(ret1) {
+      STEPS_ACROSS = 0;
+      var defer2 = q.defer();
+      walk(defer2, addressObject, 1, 2);
+      defer2.promise
+        .then(function(ret2) {
+          console.log(ret1);
+          console.log(ret2);
+        });
+    })
+    .catch(function(err) {
+      defer1.reject(err);
+    });
+  return defer1.promise;
+});
+
+var findNeighbors = function(addressObject) {
+  q
+    .all([
+      walkDown(afc),
+      walkUp(afc)
     ])
-  .spread(function(down, up) {
-    console.log('down neighbor is ' + down.address);
-    console.log('up neighbor is ' + up.address);
-  });
+    .spread(function(down, up) {
+      console.log('down neighbor is ' + down.address);
+      console.log('up neighbor is ' + up.address);
+    });
+};
