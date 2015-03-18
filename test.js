@@ -91,7 +91,6 @@ var walk = function(defer, addressObject, initial, increment) {
     var step_count = STEPS_DOWN;
   }
   
-  console.log(increment + ' is increment. step count: ' + step_count);
   var nextAddress = replaceAddress(addressObject, increment);
   isValid(nextAddress)
     .then(
@@ -136,16 +135,6 @@ var walkUp = function(addressObject) {
     });
   return defer.promise;
 };
-
-/*
-walkDown(us)
-  .then(function(ret) { console.log(ret); })
-  .catch(function(err) { console.log(err); });
-
-walkUp(us)
-  .then(function(ret) { console.log(ret); })
-  .catch(function(err) { console.log(err); });
-  */
 
 q.all([
     walkDown(afc),
