@@ -9,26 +9,56 @@ var STEPS_ACROSS = 0;
 var AUTH_ID = 'c5fe82ac-e88c-41ed-bce7-968bf368ba4a';
 var AUTH_TOKEN = '4PKfgfUFyiMPtIc2v43i';
 
-var us = {
-  address: '760 Virginia Park Street',
-  city: 'Detroit',
-  state: 'MI',
-  zip: '48202'
-};
+var ad = process.argv[2];
 
-var afc = {
-  address: '750 Virginia Park Street',
-  city: 'Detroit',
-  state: 'MI',
-  zip: '48202'
-};
+var parseAddress = function(addressInput) {
+  // Turns 'Street Address, Town, State, ZIP'
+  // into an object the script understnds
+  var streetAddressRe = /[0-9]+ [a-zA-z .]+/;
+  var streetAddressExec = streetAddressRe.exec(addressInput);
+  try {
+    var streetAddress = streetAddressExec[0];
+  }
+  catch (err) {
+    console.log('no valid street address');
+  }
+  
+  var cityRe = /, [a-zA-Z- ]+,/;
+  var cityExec = cityRe.exec(addressInput);
+  try {
+    var city = cityExec[0].slice(2,-1);
+  }
+  catch (err) {
+    console.log('no valid city');
+  }
+  
+  var stateRe = /, [A-Z]{2},*/;
+  var stateExec = stateRe.exec(addressInput);
+  try {
+    var state = stateExec[0].slice(2,4);
+  }
+  catch (err) {
+    console.log('no valid state');
+  }
 
-var fake = {
-  address: '761 Virginia Park Street',
-  city: 'Detroit',
-  state: 'MI',
-  zip: '48202'
-};
+  var zipRe = /[0-9]{5}/;
+  var zipExec = zipRe.exec(addressInput);
+  try {
+    var zip = zipExec[0];
+  }
+  catch (err) {
+    console.log('no valid zip');
+  }
+
+  var addressObject = {
+    address: streetAddress,
+    city: city,
+    state: state,
+    zip: zip
+  };
+
+  return addressObject;
+}
 
 var makeUri = function(data) {
   var uri = 'https://api.smartystreets.com/street-address?street=' + escape(data.address) +
@@ -93,8 +123,16 @@ var walk = function(defer, addressObject, initial, increment) {
     STEPS_DOWN++;
     var step_count = STEPS_DOWN;
   }
-  
-  var nextAddress = replaceAddress(addressObject, increment);
+ 
+  var nextAddress;
+  if (step_count === 1) {
+   var initialAddress = replaceAddress(addressObject, initial);
+   nextAddress = replaceAddress(initialAddress, increment);
+  }
+  else { 
+    nextAddress = replaceAddress(addressObject, increment);
+  }
+
   isValid(nextAddress)
     .then(
       function () {
@@ -139,37 +177,36 @@ var walkUp = function(addressObject) {
   return defer.promise;
 };
 
-// This method is totally untested!
 var walkAcross = function(addressObject) {
   STEPS_ACROSS = 0;
-  var defer1 = q.defer();
-  walk(defer1, addressObject, -1, -2);
-  defer1.promise
+  var down = q.defer();
+  var up = q.defer();
+  walk(down, addressObject, -1, -2);
+  down.promise
     .then(function(ret1) {
       STEPS_ACROSS = 0;
-      var defer2 = q.defer();
-      walk(defer2, addressObject, 1, 2);
-      defer2.promise
-        .then(function(ret2) {
-          console.log(ret1);
-          console.log(ret2);
-        });
+      walk(up, addressObject, 1, 2);
     })
     .catch(function(err) {
-      defer1.reject(err);
+      down.reject(err);
+      up.reject(err);
     });
-  return defer1.promise;
+  return [down.promise, up.promise];
 };
 
 var findNeighbors = function(addressObject) {
+  var same = [walkDown(addressObject), walkUp(addressObject)];
+  var across = walkAcross(addressObject);
+  var both = same.concat(across);
   q
-    .all([
-      walkDown(addressObject),
-      walkUp(addressObject)
-    ])
-    .spread(function(down, up) {
+    .all(both)
+    .spread(function(down, up, acrossDown, acrossUp) {
       console.log('down neighbor is ' + down.address);
       console.log('up neighbor is ' + up.address);
+      console.log('acrossDown neighbor is ' + acrossDown.address);
+      console.log('acrossUp neighbor is ' + acrossUp.address);
     });
 };
 
+var adObj = parseAddress(ad);
+findNeighbors(adObj);
