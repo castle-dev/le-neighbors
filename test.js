@@ -181,11 +181,11 @@ var walkAcross = function(addressObject) {
   STEPS_ACROSS = 0;
   var down = q.defer();
   var up = q.defer();
-  walk(down, addressObject, -1, -2);
+  walk(down, addressObject, 1, -2);
   down.promise
     .then(function(ret1) {
       STEPS_ACROSS = 0;
-      walk(up, addressObject, 1, 2);
+      walk(up, addressObject, -1, 2);
     })
     .catch(function(err) {
       down.reject(err);
