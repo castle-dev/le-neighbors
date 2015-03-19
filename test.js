@@ -31,7 +31,7 @@ var fake = {
 };
 
 var makeUri = function(data) {
-  var uri = 'http://api.smartystreets.com/street-address?street=' + escape(data.address) +
+  var uri = 'https://api.smartystreets.com/street-address?street=' + escape(data.address) +
             '&city=' + escape(data.city) +
             '&state=' + data.state + 
             '&zipcode=' + data.zip +
@@ -159,16 +159,17 @@ var walkAcross = function(addressObject) {
       defer1.reject(err);
     });
   return defer1.promise;
-});
+};
 
 var findNeighbors = function(addressObject) {
   q
     .all([
-      walkDown(afc),
-      walkUp(afc)
+      walkDown(addressObject),
+      walkUp(addressObject)
     ])
     .spread(function(down, up) {
       console.log('down neighbor is ' + down.address);
       console.log('up neighbor is ' + up.address);
     });
 };
+
