@@ -1,7 +1,7 @@
 var get = require('get');
 var q = require('q');
 
-var MAX_STEPS = 100;
+var MAX_STEPS = 5;
 var STEPS_UP = 0;
 var STEPS_DOWN = 0;
 var STEPS_ACROSS = 0;
@@ -99,14 +99,21 @@ var replaceAddress = function(addressObject, increment) {
 
 var isValid = function(data) {
   var defer = q.defer();
-  var uri = makeUri(data);
-  var dl = get(uri);
-  dl.asString(function(err, ret) {
-    if (err) defer.reject(err);
-    // No results = no valid address
-    if (ret === '[]\n') defer.reject();
-    defer.resolve();
-  });
+  var number = parseInt(getNumber(data.address));
+  if (number < 1) {
+    defer.reject();
+  }
+  else {
+    console.log(number);
+    var uri = makeUri(data);
+    var dl = get(uri);
+    dl.asString(function(err, ret) {
+      if (err) defer.reject(err);
+      // No results = no valid address
+      if (ret === '[]\n') defer.reject();
+      defer.resolve();
+    });
+  }
   return defer.promise;
 };
 
