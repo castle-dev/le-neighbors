@@ -1,7 +1,7 @@
 var get = require('get');
 var q = require('q');
 
-var MAX_STEPS = 5;
+var MAX_STEPS = 20;
 var STEPS_UP = 0;
 var STEPS_DOWN = 0;
 var STEPS_ACROSS = 0;
@@ -198,8 +198,20 @@ var Neighbors = function(authID, authToken) {
     return [down.promise, up.promise];
   };
 
-  this.findNeighbors = function(address) {
+  this.findNeighbors = function(address, maxSteps) {
     var deferred = q.defer();
+
+    // The optional parameter maxSteps can override
+    // the default max steps if desired
+    if (maxSteps !== undefined) {
+      if (parseInt(maxSteps) === maxSteps) {
+        MAX_STEPS = maxSteps;
+      }
+      else {
+        deferred.reject('maxSteps is not an integer');
+      }
+    }
+
     var addressObject = parseAddress(address);
     var same = [walkDown(addressObject), walkUp(addressObject)];
     var across = walkAcross(addressObject);

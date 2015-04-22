@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/castleDevTeam/neighbors.git"
+    "url": "https://github.com/castle-dev/neighbors.git"
   },
   "keywords": [
     "addresses",
@@ -22,7 +22,7 @@
   "author": "Tim Dingman",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/castleDevTeam/neighbors/issues"
+    "url": "https://github.com/castle-dev/neighbors/issues"
   },
-  "homepage": "https://github.com/castleDevTeam/neighbors"
+  "homepage": "https://github.com/castle-dev/neighbors"
 }
