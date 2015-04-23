@@ -1,6 +1,6 @@
 {
   "name": "le-neighbors",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Find the nearest neighbors of any address!",
   "main": "index.js",
   "dependencies": {
