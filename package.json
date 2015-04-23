@@ -1,8 +1,8 @@
 {
   "name": "neighbors",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Find the nearest neighbors of any address!",
-  "main": "test.js",
+  "main": "index.js",
   "dependencies": {
     "get": "^1.4.0",
     "q": "^1.2.0"
