@@ -10,7 +10,7 @@ No external packages. Just remember to `npm install` before using.
 Here's a quick example:
 
 ```
-var Neighbors = require('./index.js');
+var Neighbors = require('le-neighbors');
 var neighbors = new Neighbors(authID, authToken);
 
 var address = '750 Virginia Park Street, Detroit, MI 48202';
