@@ -101,7 +101,6 @@ var Neighbors = function(authID, authToken) {
       defer.reject();
     }
     else {
-      console.log(number);
       var uri = makeUri(data);
       var dl = get(uri);
       dl.asString(function(err, ret) {
